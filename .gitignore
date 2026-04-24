@@ -13,3 +13,4 @@ target/
 *.ipr
 *.bsp
 *.idea/
+/api-service/src/main/scala/foundation
