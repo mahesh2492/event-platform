@@ -7,3 +7,4 @@ case class Event(
                 timestamp: Long,
                 payload: String
                 )
+
