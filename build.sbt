@@ -41,7 +41,9 @@ lazy val apiService = (project in file("api-service"))
       "org.http4s" %% "http4s-ember-server" % "0.23.26",
       "org.http4s" %% "http4s-dsl" % "0.23.26",
       "org.http4s" %% "http4s-circe" % "0.23.26",
-      "io.circe" %% "circe-generic" % "0.14.7"
+      "io.circe" %% "circe-generic" % "0.14.7",
+      "org.scalameta" %% "munit" % "0.7.29" % Test,
+      "org.typelevel" %% "munit-cats-effect-3" % "1.0.7" % Test
     )
   )
 

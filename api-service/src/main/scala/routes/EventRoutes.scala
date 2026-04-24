@@ -15,10 +15,10 @@ class EventRoutes[F[_]: Concurrent] {
 
   val routes: HttpRoutes[F] = HttpRoutes.of[F] {
     case req @ POST -> Root / "events" =>
-      for {
-        event <- req.as[Event]
-        response <- Ok(s"Event received $event")
-      } yield response
+      req.attemptAs[Event].value.flatMap {
+        case Right(event) => Ok(s"Event received $event")
+        case Left(_) => BadRequest("Invalid event payload")
+      }
   }
 
 }
