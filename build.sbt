@@ -13,7 +13,12 @@ lazy val commonSettings = Seq(
     "-deprecation",
     "-feature",
     "-unchecked"
-  )
+  ),
+  // Coverage-specific settings (optional)
+  coverageEnabled := true, // This can also be toggled via command line
+  coverageMinimumStmtTotal := 80,
+  coverageFailOnMinimum := false,
+  coverageHighlighting := true
 )
 
 // -------------------
