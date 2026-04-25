@@ -4,7 +4,7 @@ import cats.effect._
 import cats.implicits._
 import io.circe.generic.auto._
 import org.http4s.circe.CirceEntityCodec._
-import model.Event
+import domain.Event
 import org.http4s.HttpRoutes
 import org.http4s.dsl.Http4sDsl
 
@@ -16,7 +16,11 @@ class EventRoutes[F[_]: Concurrent] {
   val routes: HttpRoutes[F] = HttpRoutes.of[F] {
     case req @ POST -> Root / "events" =>
       req.attemptAs[Event].value.flatMap {
-        case Right(event) => Ok(s"Event received $event")
+        case Right(event) =>
+          event.validate match {
+            case Left(error) => BadRequest(error)
+            case Right(evnt) => Ok(s"Event received $evnt")
+          }
         case Left(_) => BadRequest("Invalid event payload")
       }
   }

@@ -1,7 +1,7 @@
 package routes
 
 import cats.effect.IO
-import model.Event
+import domain.Event
 import munit.CatsEffectSuite
 import org.http4s._
 import org.http4s.implicits._
