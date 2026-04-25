@@ -13,12 +13,7 @@ lazy val commonSettings = Seq(
     "-deprecation",
     "-feature",
     "-unchecked"
-  ),
-  // Coverage-specific settings (optional)
-  coverageEnabled := true, // This can also be toggled via command line
-  coverageMinimumStmtTotal := 80,
-  coverageFailOnMinimum := false,
-  coverageHighlighting := true
+  )
 )
 
 // -------------------
@@ -48,7 +43,11 @@ lazy val apiService = (project in file("api-service"))
       "org.http4s" %% "http4s-circe" % "0.23.26",
       "io.circe" %% "circe-generic" % "0.14.7",
       "org.scalameta" %% "munit" % "0.7.29" % Test,
-      "org.typelevel" %% "munit-cats-effect-3" % "1.0.7" % Test
+      "org.typelevel" %% "munit-cats-effect-3" % "1.0.7" % Test,
+      "org.slf4j" % "slf4j-api" % "2.0.13",
+      "org.apache.logging.log4j" % "log4j-slf4j2-impl" % "2.23.1",
+      "org.apache.logging.log4j" % "log4j-core" % "2.23.1",
+      "org.apache.logging.log4j" % "log4j-api" % "2.23.1"
     )
   )
 
