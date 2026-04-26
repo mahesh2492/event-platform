@@ -3,21 +3,15 @@ pipeline {
 
     stages {
 
-        stage('Checkout') {
-            steps {
-                git 'https://github.com/mahesh2492/event-platform.git'
-            }
-        }
-
         stage('Build') {
             steps {
-                bat 'sbt clean compile'
+                sh 'sbt clean compile'
             }
         }
 
         stage('Test') {
             steps {
-                bat 'sbt "project apiService" test'
+                sh 'sbt "project apiService" test'
             }
         }
     }
