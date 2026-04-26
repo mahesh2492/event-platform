@@ -1,11 +1,6 @@
 pipeline {
     agent any
 
-    tools {
-        // optional if Jenkins has SBT configured
-        // jdk 'jdk8'
-    }
-
     stages {
 
         stage('Checkout') {
