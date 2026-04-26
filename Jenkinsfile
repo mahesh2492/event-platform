@@ -1,12 +1,13 @@
 pipeline {
     agent any
 
-    stages {
-
-        tools {
+    tools {
          jdk 'jdk 1.8'
          sbt 'sbt-1.9.8'
-        }
+    }
+
+    stages {
+
 
         stage('Build') {
             steps {
