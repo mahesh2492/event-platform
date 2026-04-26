@@ -3,6 +3,11 @@ pipeline {
 
     stages {
 
+        tools {
+         jdk 'jdk 1.8'
+         sbt 'sbt-1.9.8'
+        }
+
         stage('Build') {
             steps {
                 sh 'sbt clean compile'
