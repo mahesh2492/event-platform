@@ -47,7 +47,8 @@ lazy val apiService = (project in file("api-service"))
       "org.slf4j" % "slf4j-api" % "2.0.13",
       "org.apache.logging.log4j" % "log4j-slf4j2-impl" % "2.23.1",
       "org.apache.logging.log4j" % "log4j-core" % "2.23.1",
-      "org.apache.logging.log4j" % "log4j-api" % "2.23.1"
+      "org.apache.logging.log4j" % "log4j-api" % "2.23.1",
+      "com.github.fd4s" %% "fs2-kafka" % "3.5.0"
     )
   )
 
