@@ -8,8 +8,9 @@ import domain.Event
 import org.http4s.HttpRoutes
 import org.http4s.dsl.Http4sDsl
 import org.slf4j.LoggerFactory
+import service.EventService
 
-class EventRoutes[F[_]: Concurrent] {
+class EventRoutes[F[_]: Concurrent](eventService: EventService[F]) {
 
   private val logger = LoggerFactory.getLogger(getClass)
   private val dsl = Http4sDsl[F]
@@ -24,7 +25,12 @@ class EventRoutes[F[_]: Concurrent] {
             case Left(error) =>
               logger.error(s"Failed to process event $error")
               BadRequest(error)
-            case Right(evnt) => Ok(s"Event received $evnt")
+
+            case Right(evnt) =>
+              for {
+                _ <- eventService.process(event)
+                res <- Ok(s"Event  $evnt has been received for processing")
+              } yield res
           }
         case Left(_) => BadRequest("Invalid event payload")
       }

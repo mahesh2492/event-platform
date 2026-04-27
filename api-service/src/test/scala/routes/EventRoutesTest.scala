@@ -1,6 +1,6 @@
 package routes
 
-import cats.effect.IO
+import cats.effect.{IO, Sync}
 import domain.Event
 import munit.CatsEffectSuite
 import org.http4s._
@@ -9,11 +9,13 @@ import io.circe.generic.auto._
 import io.circe.syntax._
 import org.http4s.Status.{BadRequest, Ok}
 import org.http4s.circe._
+import service.{EventService, EventServiceImpl}
 
 class EventRoutesTest extends CatsEffectSuite {
 
   test("POST /events accept valid event") {
-    val routes = new EventRoutes[IO].routes
+    val eventService = new TestEventService[IO]
+    val routes = new EventRoutes[IO](eventService).routes
     val httpApp = routes.orNotFound
     val event = Event(
       eventId = "1",
@@ -34,7 +36,8 @@ class EventRoutesTest extends CatsEffectSuite {
   }
 
   test("POST /events with invalid json returns BadRequest") {
-    val routes = new EventRoutes[IO].routes
+    val eventService = new TestEventService[IO]
+    val routes = new EventRoutes[IO](eventService).routes
     val httpApp = routes.orNotFound
     val badJson = """{"invalid": "data"}"""
 
@@ -47,4 +50,11 @@ class EventRoutesTest extends CatsEffectSuite {
       assertEquals(response.status, BadRequest)
     }
   }
+}
+
+class TestEventService[F[_]: Sync] extends EventService[F] {
+  var received: List[Event] = List.empty
+
+  def process(event: Event): F[Unit] =
+    Sync[F].delay { received = received :+ event }
 }
