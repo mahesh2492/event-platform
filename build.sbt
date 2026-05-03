@@ -65,7 +65,9 @@ lazy val processorService = (project in file("processor-service"))
       "com.github.fd4s" %% "fs2-kafka" % "3.5.0",
       "io.circe" %% "circe-generic" % "0.14.7",
       "io.circe" %% "circe-parser" % "0.14.7",
-      "org.typelevel" %% "munit-cats-effect-3" % "1.0.7" % Test
+      "org.typelevel" %% "munit-cats-effect-3" % "1.0.7" % Test,
+      "org.flywaydb" % "flyway-core" % "8.5.13",
+      "org.postgresql" % "postgresql" % "42.7.3"
     )
   )
 
