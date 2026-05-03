@@ -7,8 +7,7 @@ import infrastructure.{KafkaEventProducer, KafkaProducerResource}
 import org.http4s.ember.server.EmberServerBuilder
 import org.slf4j.LoggerFactory
 import routes.{EventRoutes, HealthRoutes}
-import config.AppConfig
-import service.{EventService, EventServiceImpl}
+import service.EventServiceImpl
 object Http4sServer extends IOApp.Simple {
   override def run: IO[Unit] =
     KafkaProducerResource.create[IO](AppConfig.kafkaConfig).use { kafkaProducer =>

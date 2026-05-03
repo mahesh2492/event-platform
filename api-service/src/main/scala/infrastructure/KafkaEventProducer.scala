@@ -23,6 +23,7 @@ class KafkaEventProducer[F[_]: Async](
 
     producer.
       produce(producerRecord)
-      .flatMap(_ => Async[F].unit)
+      .flatten
+      .void
   }
 }
