@@ -14,3 +14,4 @@ target/
 *.bsp
 *.idea/
 /api-service/src/main/scala/foundation
+*.sc
