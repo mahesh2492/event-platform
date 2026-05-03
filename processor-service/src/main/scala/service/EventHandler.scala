@@ -1,4 +1,4 @@
-package infrastucture
+package service
 
 import domain.Event
 

@@ -2,7 +2,6 @@ package service
 
 import cats.effect.Async
 import domain.Event
-import infrastucture.EventHandler
 import org.slf4j.LoggerFactory
 
 class EventHandlerImpl[F[_]: Async] extends EventHandler[F] {

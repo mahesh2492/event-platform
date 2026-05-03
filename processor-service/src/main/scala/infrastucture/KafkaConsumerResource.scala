@@ -7,7 +7,6 @@ import fs2.kafka.{AutoOffsetReset, ConsumerSettings, KafkaProducer, ProducerSett
 object KafkaConsumerResource {
 
   def create[F[_]: Async](config: KafkaConfig): ConsumerSettings[F, String, String] = {
-    println("Creating resources for kafka consumer")
     ConsumerSettings[F, String, String]
         .withBootstrapServers(config.bootstrapServers)
         .withGroupId(config.groupId)
