@@ -9,13 +9,13 @@ import cats.Monad
 import io.circe.generic.auto._
 import io.circe.parser._
 import org.slf4j.LoggerFactory
-import service.EventHandler
+import service.{EventHandler, EventProcessor}
 
 import scala.concurrent.duration.DurationInt
 
 class KafkaEventConsumer[F[_]: Async: Monad](
                                        config: KafkaConfig,
-                                       handler: EventHandler[F]) {
+                                       processor: EventProcessor[F]) {
 
   private val logger = LoggerFactory.getLogger(getClass)
 
@@ -32,19 +32,8 @@ class KafkaEventConsumer[F[_]: Async: Monad](
             val record = committable.record.value
 
             Sync[F].delay(logger.info(s"Received record: $record")) *>
-              processRecords(record, committable.offset.commit)
+              processor.processRecords(record, committable.offset.commit)
           }
       }
   }
-
-  private def processRecords(record: String, commit: F[Unit]): F[Unit] =
-    decode[Event](record) match {
-      case Right(event) =>
-        handler.handle(event) *>
-          commit
-      case Left(err) =>
-        Async[F].delay {
-          logger.error(s"Error decoding event: $err")
-        } *> commit
-    }
 }
