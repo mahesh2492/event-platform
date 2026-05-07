@@ -4,7 +4,7 @@ object AppConfig {
 
   val kafkaConfig: KafkaConfig =
     KafkaConfig(
-      bootstrapServers = "localhost:29092",
+      bootstrapServers = "localhost:9092",
       groupId = "fresh-group-id",
       topic = "events-topic"
     )

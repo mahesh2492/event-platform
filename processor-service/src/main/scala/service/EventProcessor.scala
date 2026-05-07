@@ -15,6 +15,7 @@ class EventProcessor[F[_]: Async](handler: EventHandler[F]) {
       case Right(event) =>
         handler
           .handle(event)
+          .void
           .handleErrorWith { err =>
             Async[F].delay {
               logger.error(s"Handler failed: $err")

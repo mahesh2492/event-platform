@@ -1,4 +1,4 @@
-CREATE TABLE events (
+CREATE TABLE IF NOT EXISTS events (
   event_id TEXT PRIMARY KEY,
   user_id TEXT,
   event_type TEXT,

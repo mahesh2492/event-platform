@@ -1,15 +1,12 @@
-package infrastucture
+package infrastucture.kafka
 
+import cats.Monad
 import cats.effect.{Async, Sync}
 import cats.implicits._
 import config.KafkaConfig
-import domain.Event
 import fs2.kafka.KafkaConsumer
-import cats.Monad
-import io.circe.generic.auto._
-import io.circe.parser._
 import org.slf4j.LoggerFactory
-import service.{EventHandler, EventProcessor}
+import service.EventProcessor
 
 import scala.concurrent.duration.DurationInt
 

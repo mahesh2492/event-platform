@@ -67,7 +67,10 @@ lazy val processorService = (project in file("processor-service"))
       "io.circe" %% "circe-parser" % "0.14.7",
       "org.typelevel" %% "munit-cats-effect-3" % "1.0.7" % Test,
       "org.flywaydb" % "flyway-core" % "8.5.13",
-      "org.postgresql" % "postgresql" % "42.7.3"
+      "org.postgresql" % "postgresql" % "42.7.3",
+      "org.tpolecat" %% "doobie-core"     % "1.0.0-RC4",
+      "org.tpolecat" %% "doobie-hikari"   % "1.0.0-RC4",
+      "org.tpolecat" %% "doobie-postgres" % "1.0.0-RC4"
     )
   )
 

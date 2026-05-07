@@ -1,8 +1,8 @@
-package infrastucture
+package infrastucture.kafka
 
-import cats.effect.{Async, Resource}
+import cats.effect.Async
 import config.KafkaConfig
-import fs2.kafka.{AutoOffsetReset, ConsumerSettings, KafkaProducer, ProducerSettings}
+import fs2.kafka.{AutoOffsetReset, ConsumerSettings}
 
 object KafkaConsumerResource {
 
