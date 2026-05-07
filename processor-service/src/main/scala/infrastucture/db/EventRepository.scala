@@ -9,7 +9,7 @@ class EventRepository[F[_]: Async](xa: Transactor[F]) {
 
   def insert(event: Event): F[Int] =
     sql"""
-         |INSERT INTO events (event_id, user_id, event_type, timestamp, payload)
-         |      VALUES (${event.eventId}, ${event.userId}, ${event.eventType}, ${event.timestamp}, ${event.payload})
-         |""".update.run.transact(xa)
+         INSERT INTO events (event_id, user_id, event_type, timestamp, payload)
+          VALUES (${event.eventId}, ${event.userId}, ${event.eventType}, ${event.timestamp}, ${event.payload});
+         """.update.run.transact(xa)
 }

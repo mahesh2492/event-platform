@@ -10,7 +10,8 @@ import io.circe.generic.codec.DerivedAsObjectCodec.deriveCodec
 class EventProcessor[F[_]: Async](handler: EventHandler[F]) {
   private val logger = LoggerFactory.getLogger(getClass)
 
-  def processRecords(record: String, commit: F[Unit]): F[Unit] =
+  def processRecords(record: String, commit: F[Unit]): F[Unit] = {
+    logger.info(s"Received records to process $record")
     decode[Event](record) match {
       case Right(event) =>
         handler
@@ -26,4 +27,5 @@ class EventProcessor[F[_]: Async](handler: EventHandler[F]) {
           logger.error(s"Error decoding event: $err")
         } *> commit
     }
+  }
 }

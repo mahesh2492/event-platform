@@ -1,21 +1,19 @@
 import cats.effect.{IO, IOApp}
 import config.{AppConfig, FlywayMigration}
-import domain.Event
-import fs2.kafka.KafkaConsumer
 import infrastucture.db.{Database, EventRepository}
 import infrastucture.kafka.KafkaEventConsumer
+import org.slf4j.{Logger, LoggerFactory}
 import service.{EventHandlerImpl, EventProcessor}
 
-object EventConsumerApp extends IOApp.Simple {
+object EventProcessorApp extends IOApp.Simple {
+  val logger: Logger = LoggerFactory.getLogger(this.getClass)
   override def run: IO[Unit] = {
     IO {
       // ✅ Force JVM timezone
       System.setProperty("user.timezone", "Asia/Kolkata")
       java.util.TimeZone.setDefault(java.util.TimeZone.getTimeZone("Asia/Kolkata"))
 
-      println("Timezone: " + java.util.TimeZone.getDefault.getID)
-
-      println("Running Flyway migration...")
+      logger.info("Running Flyway migration...")
       FlywayMigration.migrate(AppConfig.dbConfig)
     } *>
     Database.transactor[IO](AppConfig.dbConfig).use { xa =>
