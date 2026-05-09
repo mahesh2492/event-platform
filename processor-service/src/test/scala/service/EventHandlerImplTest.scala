@@ -2,9 +2,15 @@ package service
 
 import cats.effect.{IO, Sync}
 import domain.Event
+import domain.EventType.UserSignup
 import infrastucture.db.EventRepository
+import io.circe.Decoder
+import io.circe.generic.semiauto.deriveDecoder
+import io.circe.parser.decode
 import munit.CatsEffectSuite
 class EventHandlerImplTest extends CatsEffectSuite {
+
+  implicit val eventDecoder: Decoder[Event] = deriveDecoder
 
   test("handle should process USER_CREATED event") {
     val repo = new FakeEventRepository[IO]
@@ -13,7 +19,7 @@ class EventHandlerImplTest extends CatsEffectSuite {
     val event = Event(
       eventId   = "evt-1",
       userId    = "user-1",
-      eventType = "USER_CREATED",
+      eventType = UserSignup,
       timestamp = 123L,
       payload   = "new user"
     )
@@ -23,17 +29,22 @@ class EventHandlerImplTest extends CatsEffectSuite {
     }
   }
 
-  test("handle should process unknown event type safely") {
-    val repo = new FakeEventRepository[IO]
-    val handler = new EventHandlerImpl[IO](repo)
+  test("should fail decoding unknown event type") {
 
-    val event = Event(
-      "evt-2", "user-2", "UNKNOWN", 123L, "data"
-    )
+    val json =
+      """
+      {
+        "eventId":"evt-1",
+        "userId":"user-1",
+        "eventType":"UNKNOWN",
+        "timestamp":123,
+        "payload":"data"
+      }
+    """
 
-    handler.handle(event).map { _ =>
-      assert(true)
-    }
+    val result = decode[Event](json)
+
+    assert(result.isLeft)
   }
 
 }

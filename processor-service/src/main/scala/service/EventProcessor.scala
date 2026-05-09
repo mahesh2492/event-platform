@@ -1,14 +1,18 @@
 package service
 
 import cats.effect.Async
-import domain.Event
-import io.circe.parser.decode
-import org.slf4j.LoggerFactory
 import cats.implicits._
-import io.circe.generic.codec.DerivedAsObjectCodec.deriveCodec
+import domain.Event
+import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
+import io.circe.parser.decode
+import io.circe.{Decoder, Encoder}
+import org.slf4j.LoggerFactory
 
 class EventProcessor[F[_]: Async](handler: EventHandler[F]) {
   private val logger = LoggerFactory.getLogger(getClass)
+
+  implicit val eventDecoder: Decoder[Event] = deriveDecoder
+  implicit val eventEncoder: Encoder[Event] = deriveEncoder
 
   def processRecords(record: String, commit: F[Unit]): F[Unit] = {
     logger.info(s"Received records to process $record")
