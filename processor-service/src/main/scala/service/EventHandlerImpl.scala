@@ -1,7 +1,7 @@
 package service
 
 import cats.effect.Async
-import domain.Event
+import domain.{Event, PaymentFailed, Purchase, UserLogin, UserSignup}
 import infrastucture.db.EventRepository
 import org.slf4j.LoggerFactory
 import cats.syntax.all._
@@ -17,17 +17,17 @@ class EventHandlerImpl[F[_]: Async](repo: EventRepository[F]) extends EventHandl
 
   private def handleByType(event: Event): F[Unit] = {
     event.eventType match {
-      case "USER_SIGNUP" => Async[F].delay {
+      case UserSignup.value => Async[F].delay {
         logger.info(s"Starting welcome flow for ${event.userId}")
       }
-      case "PURCHASE" => Async[F].delay {
+      case Purchase.value => Async[F].delay {
         logger.info(s"High value purchase for ${event.userId}")
       }
-      case "PAYMENT_FAILED" => Async[F].delay {
+      case PaymentFailed.value => Async[F].delay {
           logger.info(s"Payment has been failed for ${event.userId}")
         }
 
-      case "USER_LOGIN" => Async[F].delay {
+      case UserLogin.value => Async[F].delay {
           logger.info(s"User ${event.userId} has been logged in.")
         }
 
