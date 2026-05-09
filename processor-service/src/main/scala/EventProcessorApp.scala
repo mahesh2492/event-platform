@@ -1,6 +1,6 @@
 import cats.effect.{IO, IOApp}
 import config.{AppConfig, FlywayMigration}
-import infrastucture.db.{Database, EventRepository}
+import infrastucture.db.{Database, DoobieEventRepository}
 import infrastucture.kafka.KafkaEventConsumer
 import org.slf4j.{Logger, LoggerFactory}
 import service.{EventHandlerImpl, EventProcessor}
@@ -17,7 +17,7 @@ object EventProcessorApp extends IOApp.Simple {
       FlywayMigration.migrate(AppConfig.dbConfig)
     } *>
     Database.transactor[IO](AppConfig.dbConfig).use { xa =>
-      val repo = new EventRepository[IO](xa)
+      val repo = new DoobieEventRepository[IO](xa)
       val eventHandler = new EventHandlerImpl[IO](repo)
       val processor: EventProcessor[IO] = new EventProcessor[IO](eventHandler)
       val kafkaConsumer = new KafkaEventConsumer(AppConfig.kafkaConfig, processor)

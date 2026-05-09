@@ -14,8 +14,11 @@ class EventProcessorTest extends CatsEffectSuite {
     var called = false
 
     val handler = new EventHandler[IO] {
-      def handle(event: Event): IO[Unit] =
-        IO { called = true }
+      def handle(event: Event): IO[Int] =
+        IO {
+          called = true
+          1
+        }
     }
 
     val processor = new EventProcessor[IO](handler)
@@ -31,8 +34,11 @@ class EventProcessorTest extends CatsEffectSuite {
     var called = false
 
     val handler = new EventHandler[IO] {
-      def handle(event: Event): IO[Unit] =
-        IO { called = true }
+      def handle(event: Event): IO[Int] =
+        IO {
+          called = true
+          1
+        }
     }
 
     val processor = new EventProcessor[IO](handler)
@@ -47,7 +53,7 @@ class EventProcessorTest extends CatsEffectSuite {
     var committed = false
 
     val handler = new EventHandler[IO] {
-      def handle(event: Event): IO[Unit] = IO.unit
+      def handle(event: Event): IO[Int] = IO.pure(1)
     }
 
     val processor = new EventProcessor[IO](handler)
@@ -62,7 +68,7 @@ class EventProcessorTest extends CatsEffectSuite {
   test("should always commit on invalid JSON") {
     var committed = false
     val handler = new EventHandler[IO] {
-      def handle(event: Event): IO[Unit] = IO.unit
+      def handle(event: Event): IO[Int] = IO.pure(1)
     }
 
     val processor = new EventProcessor[IO](handler)
@@ -75,7 +81,10 @@ class EventProcessorTest extends CatsEffectSuite {
   test("should call handler exactly once") {
     var count = 0
     val handler = new EventHandler[IO] {
-      def handle(event: Event): IO[Unit] = IO { count += 1 }
+      def handle(event: Event): IO[Int] = IO {
+        count += 1
+       count
+      }
     }
 
     val processor = new EventProcessor[IO](handler)
@@ -88,7 +97,7 @@ class EventProcessorTest extends CatsEffectSuite {
     var committed = false
 
     val handler = new EventHandler[IO] {
-      def handle(event: Event): IO[Unit] =
+      def handle(event: Event): IO[Int] =
         IO.raiseError(new RuntimeException("boom"))
     }
 

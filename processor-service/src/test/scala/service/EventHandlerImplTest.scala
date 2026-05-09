@@ -1,13 +1,14 @@
 package service
 
-import cats.effect.IO
+import cats.effect.{IO, Sync}
 import domain.Event
-import munit.{CatsEffectSuite, FunSuite}
-
+import infrastucture.db.EventRepository
+import munit.CatsEffectSuite
 class EventHandlerImplTest extends CatsEffectSuite {
 
   test("handle should process USER_CREATED event") {
-    val handler  = new EventHandlerImpl[IO]
+    val repo = new FakeEventRepository[IO]
+    val handler  = new EventHandlerImpl[IO](repo)
 
     val event = Event(
       eventId   = "evt-1",
@@ -17,13 +18,14 @@ class EventHandlerImplTest extends CatsEffectSuite {
       payload   = "new user"
     )
 
-    handler.handle(event).map { _ =>
-      assert(true) // replace with real assertions when logic grows
+    handler.handle(event).map { rows =>
+      assert(rows > 0) // replace with real assertions when logic grows
     }
   }
 
   test("handle should process unknown event type safely") {
-    val handler = new EventHandlerImpl[IO]
+    val repo = new FakeEventRepository[IO]
+    val handler = new EventHandlerImpl[IO](repo)
 
     val event = Event(
       "evt-2", "user-2", "UNKNOWN", 123L, "data"
@@ -34,5 +36,16 @@ class EventHandlerImplTest extends CatsEffectSuite {
     }
   }
 
+}
+
+class FakeEventRepository[F[_]: Sync] extends EventRepository[F] {
+  var insertedEvents: List[Event] = List.empty
+
+  override def insert(event: Event): F[Int] = {
+    Sync[F].delay {
+      insertedEvents = insertedEvents :+ event
+      1
+    }
+  }
 }
 
