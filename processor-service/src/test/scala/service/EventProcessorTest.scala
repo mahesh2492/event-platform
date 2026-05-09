@@ -7,7 +7,7 @@ import munit.CatsEffectSuite
 class EventProcessorTest extends CatsEffectSuite {
 
   def validJson =
-    """{"eventId":"evt-1","userId":"user-1","eventType":"TEST","timestamp":123,"payload":"data"}"""
+    """{"eventId":"evt-1","userId":"user-1","eventType":"TEST_EVENT","timestamp":123,"payload":"data"}"""
 
   test("should call handler for valid event") {
 
