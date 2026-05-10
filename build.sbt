@@ -78,6 +78,23 @@ lazy val processorService = (project in file("processor-service"))
     )
   )
 
+lazy val notificationService = (project in file("notification-service"))
+  .settings(commonSettings)
+  .settings(
+    name := "notification-service",
+    libraryDependencies ++= Seq(
+      "org.typelevel" %% "cats-effect" % "3.5.4",
+      "com.github.fd4s" %% "fs2-kafka" % "3.5.0",
+      "io.circe" %% "circe-generic" % "0.14.7",
+      "io.circe" %% "circe-parser" % "0.14.7",
+      "org.typelevel" %% "munit-cats-effect-3" % "1.0.7" % Test,
+      "org.slf4j" % "slf4j-api" % "2.0.13",
+      "org.apache.logging.log4j" % "log4j-slf4j2-impl" % "2.23.1",
+      "org.apache.logging.log4j" % "log4j-core" % "2.25.4",
+      "org.apache.logging.log4j" % "log4j-api" % "2.23.1"
+    )
+  )
+
 lazy val root = (project in file("."))
   .aggregate(shared, apiService, processorService)
   .settings(
