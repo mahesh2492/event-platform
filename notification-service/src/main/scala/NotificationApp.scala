@@ -1,12 +1,12 @@
 
 import cats.effect.{IO, IOApp}
 import config.AppConfig
-import infrastructure.KafkaEventConsumer
-import org.slf4j.{Logger, LoggerFactory}
+import infrastructure.kafka.KafkaEventConsumer
+import service.NotificationServiceImpl
 
 object NotificationApp extends IOApp.Simple {
 
-  val kafkaConsumer = new KafkaEventConsumer[IO](AppConfig.kafkaConfig)
-
+  val notificationService = new NotificationServiceImpl[IO]
+  val kafkaConsumer = new KafkaEventConsumer[IO](AppConfig.kafkaConfig, notificationService)
   override def run: IO[Unit] = kafkaConsumer.stream.compile.drain
 }

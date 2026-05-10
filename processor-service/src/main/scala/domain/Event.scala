@@ -55,4 +55,3 @@ case class Event(
         case TestEvent => "TEST_EVENT"
       }
   }
-

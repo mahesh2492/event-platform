@@ -13,7 +13,6 @@ class EventProcessor[F[_]: Async](handler: EventHandler[F]) {
 
   implicit val eventDecoder: Decoder[Event] = deriveDecoder
   implicit val eventEncoder: Encoder[Event] = deriveEncoder
-
   def processRecords(record: String, commit: F[Unit]): F[Unit] = {
     logger.info(s"Received records to process $record")
     decode[Event](record) match {
