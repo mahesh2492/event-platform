@@ -1,12 +1,15 @@
 
 import cats.effect.{IO, IOApp}
 import config.AppConfig
-import infrastructure.kafka.KafkaEventConsumer
+import infrastructure.kafka.{DlqProducer, DlqProducerResource, KafkaEventConsumer}
 import service.NotificationServiceImpl
 
 object NotificationApp extends IOApp.Simple {
-
-  val notificationService = new NotificationServiceImpl[IO]
-  val kafkaConsumer = new KafkaEventConsumer[IO](AppConfig.kafkaConfig, notificationService)
-  override def run: IO[Unit] = kafkaConsumer.stream.compile.drain
+  override def run: IO[Unit] =
+    DlqProducerResource.create[IO](AppConfig.kafkaProducerConfig).use { kafkaProducer =>
+      val dlqProducer = new DlqProducer[IO](kafkaProducer, AppConfig.kafkaProducerConfig)
+      val notificationService = new NotificationServiceImpl[IO]
+      val kafkaConsumer = new KafkaEventConsumer[IO](AppConfig.kafkaConsumerConfig, notificationService, dlqProducer)
+      kafkaConsumer.stream.compile.drain
+    }
 }

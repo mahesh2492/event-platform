@@ -1,12 +1,12 @@
 package infrastructure.kafka
 
 import cats.effect.Async
-import config.KafkaConfig
+import config.KafkaConsumerConfig
 import fs2.kafka.{AutoOffsetReset, ConsumerSettings}
 
 object KafkaConsumerResource {
 
-  def create[F[_]: Async](config: KafkaConfig): ConsumerSettings[F, String, String] = {
+  def create[F[_]: Async](config: KafkaConsumerConfig): ConsumerSettings[F, String, String] = {
     ConsumerSettings[F, String, String]
       .withBootstrapServers(config.bootstrapServers)
       .withGroupId(config.groupId)
