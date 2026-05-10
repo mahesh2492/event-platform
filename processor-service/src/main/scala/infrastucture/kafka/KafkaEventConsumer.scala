@@ -33,4 +33,5 @@ class KafkaEventConsumer[F[_]: Async: Monad](
           }
       }
   }
+
 }

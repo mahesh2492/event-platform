@@ -24,4 +24,5 @@ class NotificationServiceImpl[F[_]: Async] extends NotificationService[F] {
           }
     } yield ()
   }
+
 }

@@ -35,13 +35,12 @@ class KafkaEventConsumer[F[_]: Async: Monad](config: KafkaConfig, notificationSe
 
             decode[Event](record) match {
               case Right(event) =>
-                notificationService
+g                notificationService
                   .send(event)
                   .void
-                  .handleErrorWith { err =>
-                    Async[F].delay {
-                      logger.error(s"Handler failed: $err")
-                    }
+                  .handleErrorWith { _ =>
+                    logger.error(s"Encountered error, going to retry!")
+                    retry(notificationService.send(event), 3)
                   } *> commit
               case Left(err) =>
                 Async[F].delay {
@@ -51,4 +50,16 @@ class KafkaEventConsumer[F[_]: Async: Monad](config: KafkaConfig, notificationSe
           }
       }
   }
+
+  def retry[A](fa: F[A], attempts: Int): F[A] = {
+    fa.handleErrorWith { err =>
+      if(attempts > 1) {
+        Async[F].delay {
+          logger.info(s"Attempting retry $attempts")
+        } *> retry(fa, attempts - 1)
+      } else
+        Async[F].raiseError(err)
+    }
+  }
+
 }
