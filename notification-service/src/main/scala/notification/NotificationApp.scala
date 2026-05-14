@@ -1,3 +1,5 @@
+package notification
+
 
 import cats.effect.{IO, IOApp}
 import config.AppConfig

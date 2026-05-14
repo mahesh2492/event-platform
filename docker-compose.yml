@@ -8,9 +8,9 @@ services:
       # Standard Kafka Environment Variables
       - KAFKA_NODE_ID=1
       - KAFKA_PROCESS_ROLES=broker,controller
-      - KAFKA_CONTROLLER_QUORUM_VOTERS=1@localhost:9093
-      - KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
-      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092
+      - KAFKA_CONTROLLER_QUORUM_VOTERS=1@kafka-server:9093
+      - KAFKA_LISTENERS=PLAINTEXT://:9092,CONTROLLER://0.0.0.0:9093
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka-server:9092
       - KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER
       - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
       - KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT
@@ -18,6 +18,11 @@ services:
       - KAFKA_CLUSTER_ID=kraft-cluster-1
     volumes:
       - kafka_data:/var/lib/kafka/data
+    healthcheck:
+      test: [ "CMD", "bash", "-c", "echo > /dev/tcp/localhost/9092" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
   postgres:
     image: postgres:15
     container_name: postgres-db
@@ -34,6 +39,40 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
+  api-service:
+    build: .
+    container_name: api-service
+    depends_on:
+      kafka:
+        condition: service_healthy
+    command:
+      - sbt
+      - "apiService/runMain api.Http4sServer"
+    ports:
+      - "9000:9000"
+
+  processor-service:
+    build: .
+    container_name: processor-service
+    depends_on:
+      kafka:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    command:
+      - sbt
+      - "processorService/runMain processor.EventProcessorApp"
+
+  notification-service:
+    build: .
+    container_name: notification-service
+    depends_on:
+      kafka:
+        condition: service_healthy
+    command:
+      - sbt
+      - "notificationService/runMain notification.NotificationApp"
 
 volumes:
   kafka_data:
