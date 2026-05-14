@@ -1,196 +1,344 @@
 # Event Platform
 
-## 📌 Overview
+A distributed event-driven platform built with Scala, Kafka, PostgreSQL, fs2-kafka, Cats Effect, and http4s.
 
-Event Platform is a distributed system that processes events asynchronously using **Apache Kafka** and persists them into **PostgreSQL**.
-
-The system is designed with a clear separation of concerns:
-
-* **API Service** → Produces events to Kafka
-* **Processor Service** → Consumes events and processes them
-* **PostgreSQL** → Stores processed events
+The platform demonstrates how independent microservices communicate asynchronously using Kafka while persisting and processing events reliably.
 
 ---
 
-## 🏗️ Architecture
+# Architecture
 
+```text
+Client
+   |
+   v
+API Service (http4s)
+   |
+   v
+Kafka Topic (events-topic)
+   |
+   +----------------------+
+   |                      |
+   v                      v
+Processor Service     Notification Service
+   |                      |
+   v                      v
+PostgreSQL            Notification Handling
 ```
-Client → API Service → Kafka → Processor Service → PostgreSQL
+
+---
+
+# Services
+
+## API Service
+
+Responsible for:
+
+* Exposing HTTP endpoints
+* Accepting incoming events
+* Publishing events to Kafka
+
+### Endpoints
+
+#### Health Check
+
+```http
+GET /health
 ```
 
-### Flow
+#### Publish Event
 
-1. Client sends event to API
-2. API publishes event to Kafka topic
-3. Processor service consumes event
-4. Event is processed and stored in Postgres
-5. Offset is committed only after successful processing
+```http
+POST /events
+Content-Type: application/json
+```
 
----
+Example payload:
 
-## 🧩 Services
-
-### 1. API Service
-
-* Accepts HTTP requests
-* Validates event
-* Publishes to Kafka
-
-### 2. Processor Service
-
-* Consumes events from Kafka
-* Decodes JSON into domain model
-* Applies business logic
-* Persists event to database
+```json
+{
+  "eventId": "evt-4001",
+  "userId": "user-9990",
+  "eventType": "USER_SIGNUP",
+  "timestamp": 1778729007530,
+  "payload": "User signup event"
+}
+```
 
 ---
 
-## ⚙️ Tech Stack
+## Processor Service
 
-* Scala (Cats Effect, FS2)
-* Kafka (KRaft mode)
+Responsible for:
+
+* Consuming events from Kafka
+* Processing business workflows
+* Persisting events into PostgreSQL
+* Retry handling
+* DLQ publishing
+
+---
+
+## Notification Service
+
+Responsible for:
+
+* Consuming events from Kafka
+* Sending notifications
+* Handling malformed events gracefully
+
+---
+
+# Tech Stack
+
+* Scala 2.13
+* Cats Effect 3
+* fs2-kafka
+* http4s
+* Circe
 * PostgreSQL
-* Doobie (DB access)
-* Circe (JSON)
+* Kafka (KRaft mode)
+* Docker
+* Docker Compose
+* HikariCP
+* Log4j2
 
 ---
 
-## 📁 Project Structure
+# Project Structure
 
-### Processor Service
-
-```
-processor-service
-├── config
-│   ├── AppConfig
-│   └── KafkaConfig
-│
-├── domain
-│   └── Event
-│
-├── infrastructure
-│   ├── KafkaConsumerResource
-│   └── KafkaEventConsumer
-│
-├── service
-│   ├── EventHandler
-│   ├── EventHandlerImpl
-│   └── EventProcessor
+```text
+event-platform/
+├── api-service/
+├── processor-service/
+├── notification-service/
+├── shared/
+├── docker-compose.yml
+├── build.sbt
+└── README.md
 ```
 
 ---
 
-## 🚀 Getting Started
+# Running the Platform
 
-### 1. Start Infrastructure
+## Start all services
 
 ```bash
-docker-compose up -d
+docker compose up --build
 ```
-
-Services started:
-
-* Kafka → localhost:9092
-* Postgres → localhost:5432
 
 ---
 
-### 2. Create Database Table
+# Docker Services
+
+| Service     | Port |
+| ----------- | ---- |
+| API Service | 9000 |
+| Kafka       | 9092 |
+| PostgreSQL  | 5432 |
+
+---
+
+# Kafka Topics
+
+| Topic            | Purpose                    |
+| ---------------- | -------------------------- |
+| events-topic     | Main event stream          |
+| notification-dlq | Failed notification events |
+
+---
+
+# Important Docker Networking Notes
+
+Inside Docker containers:
+
+* DO NOT use `localhost`
+* Use Docker service names instead
+
+Example:
+
+```text
+kafka-server:9092
+postgres-db:5432
+```
+
+Incorrect:
+
+```text
+localhost:9092
+localhost:5432
+```
+
+---
+
+# Kafka Configuration
+
+Kafka runs in KRaft mode using the official Apache Kafka image.
+
+Example configuration:
+
+```yaml
+kafka:
+  image: apache/kafka:3.7.0
+  container_name: kafka-server
+  ports:
+    - "9092:9092"
+  environment:
+    - KAFKA_NODE_ID=1
+    - KAFKA_PROCESS_ROLES=broker,controller
+    - KAFKA_CONTROLLER_QUORUM_VOTERS=1@kafka-server:9093
+    - KAFKA_LISTENERS=PLAINTEXT://:9092,CONTROLLER://0.0.0.0:9093
+    - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka-server:9092
+    - KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER
+    - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+    - KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+```
+
+---
+
+# SBT Multi-Module Notes
+
+Running a subproject inside Docker requires:
+
+```bash
+sbt "apiService/runMain api.Http4sServer"
+```
+
+NOT:
+
+```bash
+sbt project apiService runMain api.Http4sServer
+```
+
+---
+
+# Database Setup
+
+Create database tables manually or via migrations.
+
+Example:
 
 ```sql
 CREATE TABLE events (
-  event_id TEXT PRIMARY KEY,
-  user_id TEXT,
-  event_type TEXT,
-  timestamp BIGINT,
-  payload TEXT
+    event_id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    event_type TEXT NOT NULL,
+    payload TEXT NOT NULL,
+    created_at BIGINT NOT NULL
 );
 ```
 
 ---
 
-### 3. Run Services
+# Example Test Request
 
-#### API Service
-
-```bash
-sbt "project apiService" run
-```
-
-#### Processor Service
-
-```bash
-sbt "project processorService" run
-```
-
----
-
-## 🧪 Sending Test Event
-
-### PowerShell
+PowerShell:
 
 ```powershell
-$body = @{
-  eventId   = "evt-1"
-  userId    = "user-1"
-  eventType = "TEST_EVENT"
-  timestamp = [DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()
-  payload   = "Test event"
-} | ConvertTo-Json
-
 Invoke-RestMethod `
   -Uri "http://localhost:9000/events" `
-  -Method Post `
-  -Body $body `
-  -ContentType "application/json"
+  -Method POST `
+  -ContentType "application/json" `
+  -Body '{
+    "eventId":"evt-4002",
+    "userId":"user-9990",
+    "eventType":"USER_SIGNUP",
+    "timestamp":1778729007530,
+    "payload":"Second test"
+  }'
 ```
 
 ---
 
-## 🔍 Verify Data
+# Common Issues Faced
+
+## 1. Kafka Connection Refused
+
+Cause:
+
+```text
+localhost:9092 used inside containers
+```
+
+Fix:
+
+```text
+kafka-server:9092
+```
+
+---
+
+## 2. PostgreSQL Connection Refused
+
+Cause:
+
+```text
+localhost:5432 used inside containers
+```
+
+Fix:
+
+```text
+postgres-db:5432
+```
+
+---
+
+## 3. SBT Command Failing in Docker
+
+Incorrect:
 
 ```bash
-docker exec -it postgres-db psql -U postgres -d events_db -c "SELECT * FROM events;"
+sbt project apiService runMain api.Http4sServer
+```
+
+Correct:
+
+```bash
+sbt "apiService/runMain api.Http4sServer"
 ```
 
 ---
 
-## ✅ Processing Guarantees
+## 4. Event Decoding Failure
 
-* **At-least-once delivery**
-* Offset committed only after successful DB write
-* Invalid JSON messages are skipped safely
+Example:
 
----
+```text
+Unknown event type: TestEvent
+```
 
-## ⚠️ Known Limitations
+Cause:
 
-* No retry mechanism (yet)
-* No dead-letter queue (DLQ)
-* No schema migration tool (manual SQL)
-* No idempotency beyond primary key constraint
+Mismatch between encoded enum values and decoder values.
 
 ---
 
-## 🔮 Future Improvements
+# Future Improvements
 
-* Retry with exponential backoff
-* Dead Letter Queue (DLQ)
-* Flyway for schema migrations
-* Event-type based routing
-* Integration tests with Testcontainers
-
----
-
-## 🧠 Design Principles
-
-* Separation of infrastructure and business logic
-* Functional effect handling using Cats Effect
-* Testable components (EventProcessor, EventHandler)
-* Minimal side effects
+* Schema migrations with Flyway
+* Avro/Protobuf schema registry
+* Observability with Prometheus/Grafana
+* Kubernetes deployment
+* Authentication & authorization
+* Kafka retries with backoff policies
+* OpenTelemetry tracing
+* Integration testing with Testcontainers
 
 ---
 
-## 👨‍💻 Author
+# Learning Goals
 
-Event Platform Project
+This project demonstrates:
+
+* Event-driven architecture
+* Distributed systems communication
+* Kafka producer/consumer patterns
+* Fault tolerance and retries
+* Dead-letter queue handling
+* Docker networking
+* Functional programming with Cats Effect
+* Scala microservice design
+
+---
