@@ -1,3 +1,5 @@
+package processor
+
 import cats.effect.{IO, IOApp}
 import config.{AppConfig, FlywayMigration}
 import infrastucture.db.{Database, DoobieEventRepository}

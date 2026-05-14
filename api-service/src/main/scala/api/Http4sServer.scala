@@ -1,3 +1,5 @@
+package api
+
 
 import cats.effect._
 import cats.implicits._
@@ -22,6 +24,7 @@ object Http4sServer extends IOApp.Simple {
 
       EmberServerBuilder
         .default[IO]
+        .withHost(ipv4"0.0.0.0")
         .withPort(port"9000")
         .withHttpApp(allRoutes.orNotFound)
         .build

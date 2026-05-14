@@ -38,6 +38,10 @@ class EventHandlerImpl[F[_]: Async](repo: EventRepository[F]) extends EventHandl
           logger.info(s"User ${event.userId} has been logged in.")
         }
 
+      case TestEvent => Async[F].delay {
+        logger.info(s"Processing test event: ${event.eventId}")
+      }
+
       case _ =>
         Async[F].delay {
           logger.info(s"Unhandled event type: ${event.eventType}")
