@@ -2,7 +2,7 @@ package service
 
 import cats.effect.{IO, Sync}
 import domain.Event
-import infrastructure.EventProducer
+import infrastructure.kafka.EventProducer
 import munit.{CatsEffectSuite, FunSuite}
 
 class EventServiceImplTest extends CatsEffectSuite {

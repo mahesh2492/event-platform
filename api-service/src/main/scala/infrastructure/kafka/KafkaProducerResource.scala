@@ -1,4 +1,4 @@
-package infrastructure
+package infrastructure.kafka
 
 import cats.effect.{Async, Resource}
 import config.KafkaConfig
