@@ -48,7 +48,11 @@ lazy val apiService = (project in file("api-service"))
       "org.apache.logging.log4j" % "log4j-slf4j2-impl" % "2.23.1",
       "org.apache.logging.log4j" % "log4j-core" % "2.25.4",
       "org.apache.logging.log4j" % "log4j-api" % "2.23.1",
-      "com.github.fd4s" %% "fs2-kafka" % "3.5.0"
+      "com.github.fd4s" %% "fs2-kafka" % "3.5.0",
+      "org.postgresql" % "postgresql" % "42.7.3",
+      "org.tpolecat" %% "doobie-core"     % "1.0.0-RC4",
+      "org.tpolecat" %% "doobie-hikari"   % "1.0.0-RC4",
+      "org.tpolecat" %% "doobie-postgres" % "1.0.0-RC4",
     )
   )
 
