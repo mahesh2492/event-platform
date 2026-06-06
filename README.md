@@ -72,10 +72,26 @@ Example payload:
 Responsible for:
 
 * Consuming events from Kafka
+* Event validation
 * Processing business workflows
 * Persisting events into PostgreSQL
 * Retry handling
 * DLQ publishing
+* Prometheus metrics instrumentation
+
+### Metrics
+
+The processor service exposes Prometheus metrics on:
+
+http://localhost:9095/metrics
+
+Available metrics:
+
+| Metric | Description |
+|----------|-------------|
+| events_processed_total | Total successfully processed events |
+| event_processing_failures_total | Total failed event processing attempts |
+| event_processing_latency_seconds | Event processing latency histogram |
 
 ---
 
@@ -96,8 +112,11 @@ Responsible for:
 * fs2-kafka
 * http4s
 * Circe
+* Doobie
 * PostgreSQL
+* Flyway
 * Kafka (KRaft mode)
+* Prometheus
 * Docker
 * Docker Compose
 * HikariCP
@@ -132,12 +151,13 @@ docker compose up --build
 
 # Docker Services
 
-| Service     | Port |
-| ----------- | ---- |
-| API Service | 9000 |
-| Kafka       | 9092 |
-| PostgreSQL  | 5432 |
-
+| Service              | Port |
+|----------------------|------|
+| API Service          | 9000 |
+| Processor Metrics    | 9095 |
+| Prometheus           | 9090 |
+| Kafka                | 9092 |
+| PostgreSQL           | 5432 |
 ---
 
 # Kafka Topics
@@ -315,15 +335,68 @@ Mismatch between encoded enum values and decoder values.
 
 ---
 
+# Observability
+
+The processor service exposes Prometheus metrics through an embedded HTTP server.
+
+Metrics endpoint:
+
+http://localhost:9095/metrics
+
+Prometheus scrapes processor metrics and stores time-series data for:
+
+* Throughput monitoring
+* Failure tracking
+* Latency analysis
+
+Example metrics:
+
+events_processed_total
+
+event_processing_failures_total
+
+event_processing_latency_seconds
+
+Example Prometheus queries:
+
+rate(events_processed_total[1m])
+
+rate(event_processing_failures_total[5m])
+
+histogram_quantile(
+0.95,
+rate(event_processing_latency_seconds_bucket[5m])
+)
+
+# Database Migrations
+
+Flyway is used for schema management.
+
+Migrations are executed automatically during service startup.
+
+Migration location:
+
+processor-service/src/main/resources/db/migration
+
+Example:
+
+V1__create_events_table.sql
+
+Benefits:
+
+* Version-controlled schema changes
+* Consistent environments
+* Automated startup migrations
+
 # Future Improvements
 
-* Schema migrations with Flyway
+* Grafana dashboards
+* Prometheus alerting rules
+* OpenTelemetry distributed tracing
 * Avro/Protobuf schema registry
-* Observability with Prometheus/Grafana
 * Kubernetes deployment
 * Authentication & authorization
-* Kafka retries with backoff policies
-* OpenTelemetry tracing
+* Kafka retries with exponential backoff
 * Integration testing with Testcontainers
 
 ---
@@ -333,12 +406,13 @@ Mismatch between encoded enum values and decoder values.
 This project demonstrates:
 
 * Event-driven architecture
-* Distributed systems communication
 * Kafka producer/consumer patterns
-* Fault tolerance and retries
-* Dead-letter queue handling
-* Docker networking
+* PostgreSQL persistence with Doobie
+* Database migrations with Flyway
+* Application observability with Prometheus
+* Metrics instrumentation using Counters and Histograms
+* Docker-based microservice deployment
 * Functional programming with Cats Effect
-* Scala microservice design
+* Fault tolerance and DLQ patterns
 
 ---
