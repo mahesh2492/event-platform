@@ -60,6 +60,8 @@ services:
         condition: service_healthy
       postgres:
         condition: service_healthy
+    ports:
+      - "9095:9095"
     command:
       - sbt
       - "processorService/runMain processor.EventProcessorApp"
@@ -73,7 +75,13 @@ services:
     command:
       - sbt
       - "notificationService/runMain notification.NotificationApp"
-
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
 volumes:
   kafka_data:
     driver: local

@@ -78,7 +78,10 @@ lazy val processorService = (project in file("processor-service"))
       "org.slf4j" % "slf4j-api" % "2.0.13",
       "org.apache.logging.log4j" % "log4j-slf4j2-impl" % "2.23.1",
       "org.apache.logging.log4j" % "log4j-core" % "2.25.4",
-      "org.apache.logging.log4j" % "log4j-api" % "2.23.1"
+      "org.apache.logging.log4j" % "log4j-api" % "2.23.1",
+      "io.prometheus" % "simpleclient" % "0.16.0",
+      "io.prometheus" % "simpleclient_hotspot" % "0.16.0",
+      "io.prometheus" % "simpleclient_httpserver" % "0.16.0"
     )
   )
 
